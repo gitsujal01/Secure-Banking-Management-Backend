@@ -1,5 +1,6 @@
 package com.mybank.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,5 +30,10 @@ public class AuthController {
     public String Login(@RequestBody LoginRequestDto loginr)
     {
     	return authservice.loginUser(loginr);
+    }
+    @GetMapping("/api/auth/profile")
+    public String profile()
+    {
+    	return "Protected api working";
     }
 }
