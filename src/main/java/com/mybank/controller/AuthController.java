@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mybank.dto.LoginRequestDto;
+import com.mybank.dto.LoginResponseDto;
 import com.mybank.dto.RegisterRequest;
 import com.mybank.dto.RegisterResponse;
 import com.mybank.service.AuthService;
@@ -27,9 +28,10 @@ public class AuthController {
 	}
     
     @PostMapping("/api/auth/login")
-    public String Login(@RequestBody LoginRequestDto loginr)
+    public LoginResponseDto Login(@RequestBody LoginRequestDto loginr)
     {
-    	return authservice.loginUser(loginr);
+    	String token = authservice.loginUser(loginr);
+    	return new LoginResponseDto(token);
     }
     @GetMapping("/api/auth/profile")
     public String profile()

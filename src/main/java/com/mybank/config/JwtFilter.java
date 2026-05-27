@@ -22,10 +22,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JWTService jwts;
     private final UserDetailsService uds;
 
-    public JwtFilter(
-            JWTService jwts,
-            UserDetailsService uds) {
-
+    public JwtFilter(JWTService jwts, UserDetailsService uds) {
         this.jwts = jwts;
         this.uds = uds;
     }
@@ -37,53 +34,63 @@ public class JwtFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String authHeader =
-                request.getHeader("Authorization");
+        String path = request.getServletPath();
 
-        // token nahi hai
-        if(authHeader == null
-                || !authHeader.startsWith("Bearer ")) {
-
+        // ✅ Skip auth endpoints
+        if (path.startsWith("/api/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // token extract
-        String token =
-                authHeader.substring(7);
+        String authHeader = request.getHeader("Authorization");
 
-        // username extract
-        String username =
-                jwts.extractUserName(token);
+        // ❌ No token → continue without authentication
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        // already authenticated nahi hona chahiye
-        if(username != null
-                && SecurityContextHolder
-                .getContext()
-                .getAuthentication() == null) {
+        try {
+            // 🔥 Extract token
+            String token = authHeader.substring(7);
 
-            UserDetails userDetails =
-                    uds.loadUserByUsername(username);
+            // 🔥 Extract username from token
+            String username = jwts.extractUserName(token);
 
-            // token validate
-            if(jwts.validateToken(
-                    token,
-                    userDetails)) {
-
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(authToken);
+            // ❌ Invalid token
+            if (username == null) {
+                filterChain.doFilter(request, response);
+                return;
             }
+
+            // 🔥 If not already authenticated
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                UserDetails userDetails = uds.loadUserByUsername(username);
+
+                // 🔥 Validate token
+                if (jwts.validateToken(token, userDetails)) {
+
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("TOKEN = " + token);
+                    System.out.println("USERNAME = " + username);
+                    System.out.println("VALID = " + jwts.validateToken(token, userDetails));
+                }
+            }
+
+        } catch (Exception e) {
+            // ❌ Any JWT error → just continue (avoid breaking request)
+            System.out.println("JWT Filter Error: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);
     }
+    
 }

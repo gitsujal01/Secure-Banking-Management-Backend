@@ -9,4 +9,5 @@ import com.mybank.entity.User;
 
 public interface AccountRepository extends JpaRepository<Account, Long>{
 	Optional<Account> findByUser(User user);
+	Optional<Account> findByAccountNumber(String accountNumber);
 }

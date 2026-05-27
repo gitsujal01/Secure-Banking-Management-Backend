@@ -1,5 +1,6 @@
 package com.mybank.entity;
 
+
 import com.mybank.enumm.Role;
 
 import jakarta.persistence.Column;

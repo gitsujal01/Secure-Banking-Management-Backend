@@ -1,13 +1,17 @@
 package com.mybank.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
 import com.mybank.entity.Account;
+import com.mybank.entity.Transaction;
 import com.mybank.entity.User;
 import com.mybank.repository.AccountRepository;
+import com.mybank.repository.TransactionRepository;
 import com.mybank.repository.UserRepository;
 
 @Service
@@ -16,12 +20,15 @@ public class AccountServiceImpl implements AccountService
 
 	private AccountRepository accountrepo;
 	private UserRepository userrepo;
+	private TransactionRepository transactionrepo;
 	
-	
-	public AccountServiceImpl(AccountRepository accountrepo, UserRepository userrepo) {
+    
+	public AccountServiceImpl(AccountRepository accountrepo, UserRepository userrepo,
+			TransactionRepository transactionrepo) {
 		super();
 		this.accountrepo = accountrepo;
 		this.userrepo = userrepo;
+		this.transactionrepo = transactionrepo;
 	}
 
 	@Override
@@ -36,7 +43,7 @@ public class AccountServiceImpl implements AccountService
 		        );
 		account.setAccountNumber(accNo);
 		account.setBalance(BigDecimal.ZERO);
-		account.setAccounType("SAVINGS");
+		account.setAccountType("SAVINGS");
 		account.setUser(u);
 		return accountrepo.save(account);		
 	}
@@ -58,5 +65,89 @@ public class AccountServiceImpl implements AccountService
 				account.getBalance().add(amount)
 				);
 		accountrepo.save(account);
+	}
+	@Override
+	public Account getAccount(String email) {
+
+	    User user = userrepo.findByEmail(email)
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    return accountrepo.findByUser(user)
+	            .orElseThrow(() -> new RuntimeException("Account not found"));
+	}
+
+	@Override
+	public void transfer(String senderEmail,
+	                     String receiverAccount,
+	                     BigDecimal amount) {
+
+	    User senderUser = userrepo.findByEmail(senderEmail)
+	            .orElseThrow(() ->
+	                    new RuntimeException("Sender not found"));
+
+	    Account senderaccount = accountrepo.findByUser(senderUser)
+	            .orElseThrow(() ->
+	                    new RuntimeException("Sender Account not found"));
+
+	    // receiver account
+	    System.out.println(receiverAccount);
+
+	    Account receiver = accountrepo
+	            .findByAccountNumber(receiverAccount)
+	            .orElseThrow(() ->
+	                    new RuntimeException("Receiver not found"));
+
+	    if(senderaccount.getBalance()
+	            .compareTo(amount) < 0)
+	    {
+	        throw new RuntimeException("Insufficient Balance");
+	    }
+
+	    // deduct sender balance
+	    senderaccount.setBalance(
+	            senderaccount.getBalance()
+	                    .subtract(amount)
+	    );
+
+	    // add receiver balance
+	    receiver.setBalance(
+	            receiver.getBalance()
+	                    .add(amount)
+	    );
+
+	    accountrepo.save(senderaccount);
+
+	    accountrepo.save(receiver);
+
+	    // =========================
+	    // SAVE TRANSACTION
+	    // =========================
+
+	    Transaction tx = new Transaction();
+
+	    tx.setSenderAccount(
+	            senderaccount.getAccountNumber()
+	    );
+
+	    tx.setReceiverAccount(
+	            receiver.getAccountNumber()
+	    );
+
+	    tx.setAmount(amount);
+        tx.setTransactionType("transfer");
+	    tx.setTransactionTime(
+	            LocalDateTime.now()
+	    );
+
+	    transactionrepo.save(tx);
+	}
+
+	@Override
+	public List<Transaction> getTransaction(String email) {
+		// TODO Auto-generated method stub
+		User user = userrepo.findByEmail(email).orElseThrow(()->new RuntimeException("User not found"));
+		Account account = accountrepo.findByUser(user).orElseThrow(()->new RuntimeException("Account not found"));
+		
+		return transactionrepo.findBySenderAccountOrReceiverAccount(account.getAccountNumber(), account.getAccountNumber());
 	}
 }

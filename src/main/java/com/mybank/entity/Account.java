@@ -39,10 +39,10 @@ public class Account {
 	public void setBalance(BigDecimal balance) {
 		this.balance = balance;
 	}
-	public String getAccounType() {
+	public String getAccountType() {
 		return accountType;
 	}
-	public void setAccounType(String accountType) {
+	public void setAccountType(String accountType) {
 		this.accountType = accountType;
 	}
 	public User getUser() {
@@ -53,7 +53,7 @@ public class Account {
 	}
 	@Override
 	public String toString() {
-		return "Account [id=" + id + ", accountNumber=" + accountNumber + ", balance=" + balance + ", accounType="
+		return "Account [id=" + id + ", accountNumber=" + accountNumber + ", balance=" + balance + ", accountType="
 				+ accountType + ", user=" + user + "]";
 	}
 	public Account(Long id, String accountNumber, BigDecimal balance, String accountType, User user) {
