@@ -35,40 +35,35 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-
-        // ✅ Skip auth endpoints
-        if (path.startsWith("/api/auth/")) {
+        if (path.equals("/api/auth/login")||path.equals("/api/auth/register")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String authHeader = request.getHeader("Authorization");
+        System.out.println("PATH = "+path);
+        System.out.println("Auth Header = "+authHeader);
+    
 
-        // ❌ No token → continue without authentication
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            // 🔥 Extract token
             String token = authHeader.substring(7);
 
-            // 🔥 Extract username from token
             String username = jwts.extractUserName(token);
 
-            // ❌ Invalid token
             if (username == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // 🔥 If not already authenticated
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 UserDetails userDetails = uds.loadUserByUsername(username);
 
-                // 🔥 Validate token
                 if (jwts.validateToken(token, userDetails)) {
 
                     UsernamePasswordAuthenticationToken authToken =
@@ -86,7 +81,6 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e) {
-            // ❌ Any JWT error → just continue (avoid breaking request)
             System.out.println("JWT Filter Error: " + e.getMessage());
         }
 

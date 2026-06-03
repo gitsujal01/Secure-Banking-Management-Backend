@@ -85,10 +85,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
 
                     // public auth APIs
-                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/auth/**","/otp/**").permitAll()
 
                     // test API
                     .requestMatchers("/api/hello").permitAll()
+                    .requestMatchers("/swagger-ui/**","/v3/api-docs/**","/swagger-ui.html").permitAll()
 
                     // everything else secured
                     .anyRequest().authenticated()

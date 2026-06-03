@@ -1,5 +1,7 @@
 package com.mybank.controller;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -7,21 +9,26 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mybank.dto.LoginRequestDto;
 import com.mybank.dto.LoginResponseDto;
+import com.mybank.dto.ProfileResponse;
 import com.mybank.dto.RegisterRequest;
 import com.mybank.dto.RegisterResponse;
 import com.mybank.service.AuthService;
+import com.mybank.service.ProfileService;
 
 @RestController
 public class AuthController {
 	
 	private AuthService authservice;
 
-	public AuthController(AuthService authservice) {
+    private ProfileService profileservice;
+    
+    public AuthController(AuthService authservice, ProfileService profileservice) {
 		super();
 		this.authservice = authservice;
+		this.profileservice = profileservice;
 	}
 
-    @PostMapping("/api/auth/register")	
+	@PostMapping("/api/auth/register")	
 	public RegisterResponse register(@RequestBody RegisterRequest rr)
 	{
     	return authservice.createUser(rr);
@@ -34,8 +41,10 @@ public class AuthController {
     	return new LoginResponseDto(token);
     }
     @GetMapping("/api/auth/profile")
-    public String profile()
+    public ProfileResponse profile()
     {
-    	return "Protected api working";
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    	String email = auth.getName();
+    	return profileservice.getProfile(email);
     }
 }

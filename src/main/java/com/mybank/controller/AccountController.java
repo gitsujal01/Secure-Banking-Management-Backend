@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mybank.dto.AccountResponse;
 import com.mybank.dto.DepositRequest;
 import com.mybank.dto.TransferRequestDTO;
+import com.mybank.dto.WithDrawRequest;
 import com.mybank.entity.Account;
 import com.mybank.entity.Transaction;
 import com.mybank.service.AccountService;
@@ -86,5 +87,13 @@ public class AccountController {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
 		return accountService.getTransaction(email);
+	}
+	@PostMapping("/withdraw")
+	public String withdraw(@RequestBody WithDrawRequest req)
+	{
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String email = auth.getName();
+		accountService.withdraw(email, req.getAmount());
+		return "Money Withdrawn Successfully";
 	}
 }

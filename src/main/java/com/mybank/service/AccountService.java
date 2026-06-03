@@ -14,4 +14,5 @@ public interface AccountService {
 	public Account getAccount(String email);
     public void transfer(String senderEmail,String receiverAccount,BigDecimal amount);
     public List<Transaction> getTransaction(String email);
+    public void withdraw(String email,BigDecimal amount);
 }

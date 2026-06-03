@@ -119,9 +119,6 @@ public class AccountServiceImpl implements AccountService
 
 	    accountrepo.save(receiver);
 
-	    // =========================
-	    // SAVE TRANSACTION
-	    // =========================
 
 	    Transaction tx = new Transaction();
 
@@ -149,5 +146,18 @@ public class AccountServiceImpl implements AccountService
 		Account account = accountrepo.findByUser(user).orElseThrow(()->new RuntimeException("Account not found"));
 		
 		return transactionrepo.findBySenderAccountOrReceiverAccount(account.getAccountNumber(), account.getAccountNumber());
+	}
+
+	@Override
+	public void withdraw(String email, BigDecimal amount) {
+		// TODO Auto-generated method stub
+		User user = userrepo.findByEmail(email).orElseThrow(()-> new RuntimeException("User not found"));
+		Account account = accountrepo.findByUser(user).orElseThrow(()->new RuntimeException("Account not found"));
+		if(account.getBalance().compareTo(amount)<0)
+		{
+			throw new RuntimeException("Insufficient Balance");
+		}
+		account.setBalance(account.getBalance().subtract(amount));
+		accountrepo.save(account);
 	}
 }
