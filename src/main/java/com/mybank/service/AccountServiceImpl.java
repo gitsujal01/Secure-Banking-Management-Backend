@@ -2,11 +2,14 @@ package com.mybank.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
+import com.mybank.dto.TransferRequestDTO;
 import com.mybank.entity.Account;
 import com.mybank.entity.Transaction;
 import com.mybank.entity.User;
@@ -18,17 +21,20 @@ import com.mybank.repository.UserRepository;
 public class AccountServiceImpl implements AccountService
 {
 
+	private Map<String, TransferRequestDTO> pendingTransfers = new HashMap<>();
 	private AccountRepository accountrepo;
 	private UserRepository userrepo;
 	private TransactionRepository transactionrepo;
-	
+	private OtpService otpservice;
     
+
 	public AccountServiceImpl(AccountRepository accountrepo, UserRepository userrepo,
-			TransactionRepository transactionrepo) {
+			TransactionRepository transactionrepo, OtpService otpservice) {
 		super();
 		this.accountrepo = accountrepo;
 		this.userrepo = userrepo;
 		this.transactionrepo = transactionrepo;
+		this.otpservice = otpservice;
 	}
 
 	@Override
@@ -159,5 +165,30 @@ public class AccountServiceImpl implements AccountService
 		}
 		account.setBalance(account.getBalance().subtract(amount));
 		accountrepo.save(account);
+	}
+
+	@Override
+	public void sendTransferOtp(String email, TransferRequestDTO req) {
+		// TODO Auto-generated method stub
+	    pendingTransfers.put(email,req);
+	    otpservice.sendOtp(email);
+	}
+
+	@Override
+	public String verifyOtpAndTransfer(String email, String otp) {
+		// TODO Auto-generated method stub
+		boolean isValid = otpservice.verifyOtp(email, otp);
+		if(!isValid)
+		{
+			throw new RuntimeException("Invalid otp");
+		}
+		TransferRequestDTO req = pendingTransfers.get(email);
+		if(req==null)
+		{
+			throw new RuntimeException("No pending transfer found");
+		}
+		transfer(email,req.getReceiverAccountNumber(),req.getAmount());
+		pendingTransfers.remove(email);
+		return "Transfer successful";
 	}
 }

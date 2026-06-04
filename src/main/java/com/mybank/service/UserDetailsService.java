@@ -1,7 +1,9 @@
 package com.mybank.service;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -32,7 +34,7 @@ implements org.springframework.security.core.userdetails.UserDetailsService {
 
                 u.getEmail(),
                 u.getPassword(),
-                new ArrayList<>()
+                List.of(new SimpleGrantedAuthority("Role_"+u.getRole().name()))
         );
     }
 }

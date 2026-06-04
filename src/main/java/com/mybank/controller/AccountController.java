@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mybank.dto.AccountResponse;
 import com.mybank.dto.DepositRequest;
 import com.mybank.dto.TransferRequestDTO;
+import com.mybank.dto.VerifyOtpDto;
 import com.mybank.dto.WithDrawRequest;
 import com.mybank.entity.Account;
 import com.mybank.entity.Transaction;
@@ -95,5 +96,20 @@ public class AccountController {
 		String email = auth.getName();
 		accountService.withdraw(email, req.getAmount());
 		return "Money Withdrawn Successfully";
+	}
+	@PostMapping("/transfer/send-otp")
+	public String sendTransferOtp(@RequestBody TransferRequestDTO req)
+	{
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String email = auth.getName();
+		accountService.sendTransferOtp(email, req);
+		return "OTP Sent Successfully";
+	}
+	@PostMapping("/transfer/verify")
+	public String verifyOtp(@RequestBody VerifyOtpDto req)
+	{
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String email = auth.getName();
+		return accountService.verifyOtpAndTransfer(email, req.getOtp());
 	}
 }

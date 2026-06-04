@@ -3,6 +3,7 @@ package com.mybank.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.mybank.dto.TransferRequestDTO;
 import com.mybank.entity.Account;
 import com.mybank.entity.Transaction;
 
@@ -15,4 +16,6 @@ public interface AccountService {
     public void transfer(String senderEmail,String receiverAccount,BigDecimal amount);
     public List<Transaction> getTransaction(String email);
     public void withdraw(String email,BigDecimal amount);
+    void sendTransferOtp(String email,TransferRequestDTO req);
+    String verifyOtpAndTransfer(String email,String otp);
 }
