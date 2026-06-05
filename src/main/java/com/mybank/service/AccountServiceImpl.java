@@ -26,15 +26,19 @@ public class AccountServiceImpl implements AccountService
 	private UserRepository userrepo;
 	private TransactionRepository transactionrepo;
 	private OtpService otpservice;
+    private EmailService emailService;    
+
     
 
-	public AccountServiceImpl(AccountRepository accountrepo, UserRepository userrepo,
-			TransactionRepository transactionrepo, OtpService otpservice) {
+	public AccountServiceImpl(AccountRepository accountrepo,
+			UserRepository userrepo, TransactionRepository transactionrepo, OtpService otpservice,
+			EmailService emailService) {
 		super();
 		this.accountrepo = accountrepo;
 		this.userrepo = userrepo;
 		this.transactionrepo = transactionrepo;
 		this.otpservice = otpservice;
+		this.emailService = emailService;
 	}
 
 	@Override
@@ -122,10 +126,25 @@ public class AccountServiceImpl implements AccountService
 	    );
 
 	    accountrepo.save(senderaccount);
-
 	    accountrepo.save(receiver);
 
+	    try {
+	        emailService.sendTransferSuccessToSender(
+	                senderUser.getEmail(),
+	                receiver.getAccountNumber(),
+	                amount,
+	                senderaccount.getBalance()
+	        );
 
+	        emailService.sendMoneyReceivedToReceiver(
+	                receiver.getUser().getEmail(),
+	                senderaccount.getAccountNumber(),
+	                amount,
+	                receiver.getBalance()
+	        );
+	    } catch (Exception e) {
+	        System.out.println("Email failed: " + e.getMessage());
+	    }
 	    Transaction tx = new Transaction();
 
 	    tx.setSenderAccount(
