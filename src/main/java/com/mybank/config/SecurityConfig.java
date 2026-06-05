@@ -88,6 +88,8 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/login","/api/auth/register","/api/auth/forgot-password/send-otp",
                     		"/api/auth/forgot-password/reset","/otp/**").permitAll()
 
+                    .requestMatchers("/admin/**")
+                    .hasAuthority("ADMIN")
                     // test API
                     .requestMatchers("/api/hello").permitAll()
                     .requestMatchers("/swagger-ui/**","/v3/api-docs/**","/swagger-ui.html").permitAll()
