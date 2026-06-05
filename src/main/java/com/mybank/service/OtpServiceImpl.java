@@ -10,18 +10,23 @@ import org.springframework.stereotype.Service;
 import com.mybank.entity.OTP;
 import com.mybank.repository.OTPRepository;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class OtpServiceImpl implements OtpService{
 
 	private OTPRepository otpRepo;
 	private JavaMailSender mailSender;
 	
-	
-	
 	public OtpServiceImpl(OTPRepository otpRepo, JavaMailSender mailSender) {
 		super();
 		this.otpRepo = otpRepo;
 		this.mailSender = mailSender;
+	}
+	@PostConstruct
+	public void testEnv() {
+	    System.out.println("MAIL USER = " + System.getenv("MAIL_USERNAME"));
+	    System.out.println("MAIL PASS = " + System.getenv("MAIL_PASSWORD"));
 	}
 
 	@Override
@@ -52,5 +57,4 @@ public class OtpServiceImpl implements OtpService{
         }
 		return otpEntiy.getOtp().equals(otp);
 	}
-
 }

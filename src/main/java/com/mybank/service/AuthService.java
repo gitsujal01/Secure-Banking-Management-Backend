@@ -8,4 +8,7 @@ public interface AuthService {
 	
 	public RegisterResponse createUser(RegisterRequest rr);
 	public String loginUser(LoginRequestDto loginreq);
+	public void sendForgotPasswordOtp(String email);
+	public void resetPassword(String email,String otp,String newPassword);
+	
 }

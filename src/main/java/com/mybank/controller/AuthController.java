@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mybank.dto.ForgotPasswordDTO;
 import com.mybank.dto.LoginRequestDto;
 import com.mybank.dto.LoginResponseDto;
 import com.mybank.dto.ProfileResponse;
 import com.mybank.dto.RegisterRequest;
 import com.mybank.dto.RegisterResponse;
+import com.mybank.dto.ResetPasswordRequest;
 import com.mybank.service.AuthService;
 import com.mybank.service.ProfileService;
 
@@ -46,5 +48,17 @@ public class AuthController {
     	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     	String email = auth.getName();
     	return profileservice.getProfile(email);
+    }
+    @PostMapping("/api/auth/forgot-password/send-otp")
+    public String sendForgotPasswordOtp(@RequestBody ForgotPasswordDTO req)
+    {
+    	authservice.sendForgotPasswordOtp(req.getEmail());
+    	return "OTP sent successfully";
+    }
+    @PostMapping("/api/auth/forgot-password/reset")
+    public String resetPassword(@RequestBody ResetPasswordRequest req)
+    {
+    	authservice.resetPassword(req.getEmail(), req.getOtp(), req.getNewPassword());
+    	return "Password reset successfully";
     }
 }

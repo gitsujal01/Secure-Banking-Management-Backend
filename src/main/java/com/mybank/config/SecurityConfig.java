@@ -85,7 +85,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
 
                     // public auth APIs
-                    .requestMatchers("/api/auth/**","/otp/**").permitAll()
+                    .requestMatchers("/api/auth/login","/api/auth/register","/api/auth/forgot-password/send-otp",
+                    		"/api/auth/forgot-password/reset","/otp/**").permitAll()
 
                     // test API
                     .requestMatchers("/api/hello").permitAll()
