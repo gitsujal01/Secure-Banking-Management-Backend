@@ -17,12 +17,16 @@ public class OtpServiceImpl implements OtpService{
 
 	private OTPRepository otpRepo;
 	private JavaMailSender mailSender;
+	private EmailService emailService;
 	
-	public OtpServiceImpl(OTPRepository otpRepo, JavaMailSender mailSender) {
+    
+	public OtpServiceImpl(OTPRepository otpRepo, JavaMailSender mailSender, EmailService emailService) {
 		super();
 		this.otpRepo = otpRepo;
 		this.mailSender = mailSender;
+		this.emailService = emailService;
 	}
+
 	@PostConstruct
 	public void testEnv() {
 	    System.out.println("MAIL USER = " + System.getenv("MAIL_USERNAME"));
@@ -33,7 +37,7 @@ public class OtpServiceImpl implements OtpService{
 	public void sendOtp(String email) {
 		// TODO Auto-generated method stub
 	    String otp = String.valueOf(100000+new Random().nextInt(900000));	
-	    OTP otpEntity = new OTP();
+	    OTP otpEntity = otpRepo.findByEmail(email).orElse(new OTP());
 	    otpEntity.setEmail(email);
 	    otpEntity.setOtp(otp);
 	    otpEntity.setExpiryTime(

@@ -9,34 +9,32 @@ import com.mybank.repository.AccountRepository;
 import com.mybank.repository.UserRepository;
 
 @Service
-public class ProfileServiceImpl implements ProfileService
-{
+public class ProfileServiceImpl implements ProfileService {
 
-	private UserRepository userrepo;
-	
-	private AccountRepository accountRepo;
-	
-	
-	
-	public ProfileServiceImpl(UserRepository userrepo, AccountRepository accountRepo) {
-		super();
-		this.userrepo = userrepo;
-		this.accountRepo = accountRepo;
-	}
-	@Override
-	public ProfileResponse getProfile(String email) {
-		// TODO Auto-generated method stub
-		System.out.println(email);
-	    User user = userrepo.findByEmail(email).orElseThrow(()->new RuntimeException("User not found"));
-		System.out.println(user.getEmail());
-	    Account account = accountRepo.findByUser(user).orElseThrow(()->new RuntimeException("Account not found"));
-		return new ProfileResponse(
-				user.getName(),
-				user.getEmail(),
-				user.getRole(),
-				account.getAccountNumber(),
-				account.getAccountType()
-				);
-	}
+    private final UserRepository userRepo;
+    private final AccountRepository accountRepo;
 
+    public ProfileServiceImpl(UserRepository userRepo,
+                              AccountRepository accountRepo) {
+        this.userRepo = userRepo;
+        this.accountRepo = accountRepo;
+    }
+
+    @Override
+    public ProfileResponse getProfile(String email) {
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Account account = accountRepo.findByUser(user)
+                .orElse(null);
+
+        return new ProfileResponse(
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name(),
+                account != null ? account.getAccountNumber() : null,
+                account != null ? account.getBalance() : null
+        );
+    }
 }

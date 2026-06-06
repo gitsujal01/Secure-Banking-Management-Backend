@@ -1,6 +1,5 @@
 package com.mybank.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +12,7 @@ import com.mybank.repository.UserRepository;
 
 @Service
 public class UserDetailsService
-implements org.springframework.security.core.userdetails.UserDetailsService {
+        implements org.springframework.security.core.userdetails.UserDetailsService {
 
     private final UserRepository ur;
 
@@ -27,14 +26,12 @@ implements org.springframework.security.core.userdetails.UserDetailsService {
 
         User u = ur.findByEmail(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "User not found"));
+                        new UsernameNotFoundException("User not found"));
 
         return new org.springframework.security.core.userdetails.User(
-
                 u.getEmail(),
                 u.getPassword(),
-                List.of(new SimpleGrantedAuthority("Role_"+u.getRole().name()))
+                List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole().name()))
         );
     }
 }
